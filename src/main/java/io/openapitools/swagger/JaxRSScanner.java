@@ -1,14 +1,7 @@
 package io.openapitools.swagger;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Application;
-
+import com.google.common.collect.Sets;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import org.apache.maven.plugin.logging.Log;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -16,7 +9,13 @@ import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Application;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Scan for classes with {@link Path} annotation or {@link OpenAPIDefinition}
@@ -28,11 +27,15 @@ class JaxRSScanner {
 
     private final Set<String> resourcePackages;
 
+    private final  Set<String> componentsPackages;
+
     private final boolean useResourcePackagesChildren;
 
-    public JaxRSScanner(Log log, Set<String> resourcePackages, Boolean useResourcePackagesChildren) {
+    public JaxRSScanner(Log log, Set<String> resourcePackages, Set<String> componentsPackages, Boolean useResourcePackagesChildren) {
         this.log = log;
         this.resourcePackages = resourcePackages == null ? Collections.emptySet() : new HashSet<>(resourcePackages);
+        this.componentsPackages = componentsPackages == null ? Collections.emptySet() : new HashSet<>(componentsPackages);
+        log.info("Parsing component packages " + componentsPackages.size() );
         this.useResourcePackagesChildren = useResourcePackagesChildren != null && useResourcePackagesChildren;
     }
 
@@ -55,6 +58,16 @@ class JaxRSScanner {
         return ClassUtils.createInstance(applicationClasses.iterator().next());
     }
 
+    Set<Class<?>> schemas() {
+        Set<Class<?>> classes = Sets.newHashSet();
+        componentsPackages.forEach(packageName -> {
+            Set<Class<?>> componentClasses = findClasses(packageName);
+            log.info("Found " + componentClasses.size() + " beans in package : " + packageName);
+            classes.addAll(componentClasses);
+        });
+        return classes;
+    }
+
     Set<Class<?>> classes() {
         ConfigurationBuilder config = ConfigurationBuilder
                 .build(resourcePackages)
@@ -66,13 +79,29 @@ class JaxRSScanner {
         Stream<Class<?>> defClasses = reflections.getTypesAnnotatedWith(OpenAPIDefinition.class)
                 .stream()
                 .filter(this::filterClassByResourcePackages);
-        return Stream.concat(apiClasses, defClasses).collect(Collectors.toSet());
+
+        Set<Class<?>> classes =
+                Stream.concat(apiClasses, defClasses).collect(Collectors.toSet());
+        return classes;
     }
 
     private boolean filterClassByResourcePackages(Class<?> cls) {
         return resourcePackages.isEmpty()
                 || resourcePackages.contains(cls.getPackage().getName())
                 || (useResourcePackagesChildren && resourcePackages.stream().anyMatch(p -> cls.getPackage().getName().startsWith(p)));
+    }
+
+    private Set<Class<?>> findClasses(String packageName) {
+        Reflections reflections = new Reflections(packageName, new SubTypesScanner(false));
+        return reflections.getSubTypesOf(Object.class)
+                .stream()
+                .collect(Collectors.toSet());
+    }
+
+    private boolean filterClassByComponentPackages(Class<?> cls) {
+        return componentsPackages.isEmpty()
+                || componentsPackages.contains(cls.getPackage().getName())
+                || (useResourcePackagesChildren && componentsPackages.stream().anyMatch(p -> cls.getPackage().getName().startsWith(p)));
     }
 
 }
