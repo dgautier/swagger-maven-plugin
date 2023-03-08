@@ -27,15 +27,15 @@ class JaxRSScanner {
 
     private final Set<String> resourcePackages;
 
-    private final  Set<String> componentsPackages;
+    private final  Set<String> schemaPackages;
 
     private final boolean useResourcePackagesChildren;
 
-    public JaxRSScanner(Log log, Set<String> resourcePackages, Set<String> componentsPackages, Boolean useResourcePackagesChildren) {
+    public JaxRSScanner(Log log, Set<String> resourcePackages, Set<String> schemaPackages, Boolean useResourcePackagesChildren) {
         this.log = log;
         this.resourcePackages = resourcePackages == null ? Collections.emptySet() : new HashSet<>(resourcePackages);
-        this.componentsPackages = componentsPackages == null ? Collections.emptySet() : new HashSet<>(componentsPackages);
-        log.info("Parsing component packages " + componentsPackages.size() );
+        this.schemaPackages = schemaPackages == null ? Collections.emptySet() : new HashSet<>(schemaPackages);
+        log.info("Parsing schema packages " + this.schemaPackages.size() );
         this.useResourcePackagesChildren = useResourcePackagesChildren != null && useResourcePackagesChildren;
     }
 
@@ -60,10 +60,10 @@ class JaxRSScanner {
 
     Set<Class<?>> schemas() {
         Set<Class<?>> classes = Sets.newHashSet();
-        componentsPackages.forEach(packageName -> {
-            Set<Class<?>> componentClasses = findClasses(packageName);
-            log.info("Found " + componentClasses.size() + " beans in package : " + packageName);
-            classes.addAll(componentClasses);
+        schemaPackages.forEach(packageName -> {
+            Set<Class<?>> schemaClasses = findClasses(packageName);
+            log.info("Found " + schemaClasses.size() + " beans in package : " + packageName);
+            classes.addAll(schemaClasses);
         });
         return classes;
     }
@@ -96,12 +96,6 @@ class JaxRSScanner {
         return reflections.getSubTypesOf(Object.class)
                 .stream()
                 .collect(Collectors.toSet());
-    }
-
-    private boolean filterClassByComponentPackages(Class<?> cls) {
-        return componentsPackages.isEmpty()
-                || componentsPackages.contains(cls.getPackage().getName())
-                || (useResourcePackagesChildren && componentsPackages.stream().anyMatch(p -> cls.getPackage().getName().startsWith(p)));
     }
 
 }

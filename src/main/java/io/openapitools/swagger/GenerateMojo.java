@@ -3,7 +3,6 @@ package io.openapitools.swagger;
 import javax.ws.rs.core.Application;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -11,9 +10,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import io.openapitools.swagger.config.SwaggerConfig;
-import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
-import io.swagger.v3.core.converter.ResolvedSchema;
 import io.swagger.v3.jaxrs2.Reader;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -57,7 +54,7 @@ public class GenerateMojo extends AbstractMojo {
      * List of packages which contains API components. This is <i>not</i> recursive.
      */
     @Parameter
-    private Set<String> componentsPackages;
+    private Set<String> schemaPackages;
 
 
     /**
@@ -128,7 +125,7 @@ public class GenerateMojo extends AbstractMojo {
 
             Reader reader = new Reader(swaggerConfig == null ? new OpenAPI() : swaggerConfig.createSwaggerModel());
 
-            JaxRSScanner reflectiveScanner = new JaxRSScanner(getLog(), resourcePackages, componentsPackages, useResourcePackagesChildren);
+            JaxRSScanner reflectiveScanner = new JaxRSScanner(getLog(), resourcePackages, schemaPackages, useResourcePackagesChildren);
 
             Application application = resolveApplication(reflectiveScanner);
             reader.setApplication(application);
