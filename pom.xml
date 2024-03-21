@@ -44,7 +44,7 @@
         <groovy.version>1.8.0</groovy.version>
         <groovy.eclipse.compiler.version>2.7.0-01</groovy.eclipse.compiler.version>
         <groovy-eclipse-batch.version>2.0.4-04</groovy-eclipse-batch.version>
-        <io.github.classgraph.version>4.8.149</io.github.classgraph.version>
+        <io.github.classgraph.version>4.8.168</io.github.classgraph.version>
         <io.openapitools.jackson.dataformat.version>1.0.9</io.openapitools.jackson.dataformat.version>
         <io.swagger.core.v3.version>2.1.7</io.swagger.core.v3.version>
         <javax.xml.bin.jaxb-api.version>2.3.0</javax.xml.bin.jaxb-api.version>
