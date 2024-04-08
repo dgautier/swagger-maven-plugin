@@ -43,7 +43,7 @@
         <com.google.guava.version>33.0.0-jre</com.google.guava.version>
         <groovy.version>1.8.0</groovy.version>
         <groovy.eclipse.compiler.version>2.7.0-01</groovy.eclipse.compiler.version>
-        <groovy-eclipse-batch.version>2.0.4-04</groovy-eclipse-batch.version>
+        <groovy-eclipse-batch.version>3.0.8-01</groovy-eclipse-batch.version>
         <io.github.classgraph.version>4.8.170</io.github.classgraph.version>
         <io.openapitools.jackson.dataformat.version>1.0.9</io.openapitools.jackson.dataformat.version>
         <io.swagger.core.v3.version>2.1.7</io.swagger.core.v3.version>
